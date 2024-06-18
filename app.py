@@ -22,4 +22,5 @@ if uploaded_file is not None:
     st.write(processed_text)
 
     # Step 3: Pasting the transcript
+    st.write("\n\n\n\nTranscrição:")
     st.write(transcribed_text)

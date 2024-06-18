@@ -8,16 +8,6 @@ openai.api_key = API_KEY
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
-# def process_text(text):
-#     response = openai.ChatCompletion.create(
-#         model="gpt-4",
-#         messages=[
-#             {"role": "system", "content": "Você é um médico averso à risco."},
-#             {"role": "user", "content": f"\n\n{text}"}
-#         ]
-#     )
-#     return response['choices'][0]['message']['content']
-
 
 def process_text(text):
 
