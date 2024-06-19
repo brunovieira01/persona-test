@@ -2,9 +2,6 @@ from openai import OpenAI
 import openai
 import os
 
-API_KEY=os.environ['OPENAI_API_KEY']
-print(API_KEY)
-openai.api_key = API_KEY
 client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 

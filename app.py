@@ -2,6 +2,7 @@ import time
 import streamlit as st
 from extract_text import transcribe_audio
 from process_text import process_text
+from sqlalchemy import create_engine, text
 
 # Title
 st.title("Transcritor de Áudio")
@@ -11,7 +12,7 @@ st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de se
 
 
 # File Upload
-uploaded_file = st.file_uploader("Escolha um arquivo de áudio...", type=["wav", "mp3", "m4a"])
+uploaded_file = st.file_uploader("Escolha um arquivo de áudio de até 25MB (versão beta)...", type=["wav", "mp3", "m4a"])
 
 if uploaded_file is not None:
     
@@ -25,27 +26,55 @@ if uploaded_file is not None:
 
     # Step 2: Display timeout and completion message
     
-    st.write("Transcrição Completa!\nIniciando Processamento...")
+    st.success("**Transcrição Completa!**", icon="✅")
 
-    st.write(f"Tempo real de transcrição: {actual_time:.2f} segundos.")
-    
+    st.write(f"_Tempo de transcrição: {actual_time:.1f} segundos._")
+
+    time.sleep(1)
+
+    st.write("Iniciando Processamento...")    
     
     # Step 3: Process the extracted text using ChatGPT
-    st.write("Processando o texto...")
     processed_text,improved_transcript = process_text(transcribed_text)
-    st.write("*Análise Pronta:* ")
-    st.write(processed_text)
+    st.write("**Texto Processado:**")
+    st.write(processed_text) 
+    ### There is a st.write_stream() function and a st.stream() function, try them later.
 
     # Step 4: Pasting the transcript
-    st.write("\n\n\n\nTranscrição Processada:")
+    st.write("**Transcrição Processada:**")
     st.write(improved_transcript)
 
 
-    # Step 5: Feedback
-    st.write("Como podemos melhorar?\n\n\n")
-
-    feedback = st.chat_input("Deixe aqui seu feedback.")
-
-    feedback1 = st.text_input("Deixe aqui seu feedback.")
-
+    time.sleep(3)
     
+    st.balloons()
+
+
+    # Step 5: Get Feedback
+
+    st.write("**Como podemos melhorar?**")
+
+    feedback1 = st.text_input(":red[Deixe aqui seu feedback.]")
+
+    # if feedback1 is not ":red[Deixe aqui seu feedback.]":
+
+    #     time.sleep(2)
+    #     # Step 6: Create the SQL connection as specified in your secrets file.
+    #     conn = st.connection('fb_db', type='sql')
+
+    #     st.write(f"conn contents: {conn}")
+
+    #     # Step 7: Insert some data with conn.session.
+    #     with conn.session as s:
+    #         s.execute(text('CREATE TABLE IF NOT EXISTS feedback (Sobre_Você TEXT, Feedback TEXT);'))
+    #         people = {'Bruno': 'Sou estudante de administração'}
+    #         for k in people:
+    #             s.execute(text(
+    #                 'INSERT INTO people (Sobre_Você,Feedback) VALUES (:name, :feed);'),
+    #                 params=dict(name=k, feed=people[k])
+    #             )
+    #         s.commit()
+
+    #     # Step 8: Query and display the data you inserted
+    #     feedback0 = conn.query('select * from feedback')
+    #     st.dataframe(feedback0)
