@@ -14,7 +14,8 @@ def transcribe_audio(uploaded_file): #ajuste para +25MB
     transcription = client.audio.transcriptions.create(
     model="whisper-1", 
     file=uploaded_file,  
-    response_format="text"
+    response_format="text",
+    api_key= OPENAI
     )
 
     return transcription
