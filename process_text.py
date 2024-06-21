@@ -2,7 +2,7 @@ from openai import OpenAI
 import openai
 import os
 
-client = OpenAI()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 
 

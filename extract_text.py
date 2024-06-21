@@ -1,10 +1,11 @@
 import whisper
+import os
 from io import BytesIO
 import numpy as np
 import tempfile
 from openai import OpenAI
 
-client = OpenAI()
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 
 def transcribe_audio(uploaded_file): #ajuste para +25MB
     
