@@ -3,10 +3,16 @@ import streamlit as st
 from extract_text import transcribe_audio
 from process_text import process_text
 from sqlalchemy import create_engine, text
+import os
 
 st.set_page_config(layout="wide")
 # Title
 st.title("Transcritor de Áudio")
+
+st.write(
+    "Has environment variables been set:",
+    os.environ["OPENAI_API_KEY"] == st.secrets["OPENAI_API_KEY"],
+)
 
 # Customer guidelines
 st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de seu computador, e em seguida, abra-o abaixo.")
