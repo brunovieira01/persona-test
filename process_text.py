@@ -14,6 +14,7 @@ def process_text(text):
 
     response = client.chat.completions.create(
         model="gpt-4o",
+        api_key= OPENAI,
         messages=[
             {"role": "system",
               "content": ("""Essa é uma transcrição de um áudio. Com o mínimo de 
@@ -39,6 +40,7 @@ def process_text(text):
 
     response = client.chat.completions.create(
         model="gpt-4o",
+        api_key= OPENAI,
         messages=[
             {"role": "system",
               "content": (
