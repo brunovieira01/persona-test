@@ -1,5 +1,5 @@
 import time
-import numpy as np
+from google_sheets import find_empty_cell, find_values, SPREADSHEET_ID, google_computer_engine
 import streamlit as st
 from extract_text import transcribe_audio
 from process_text import process_text
@@ -8,10 +8,8 @@ import os
 
 st.set_page_config(layout="wide")
 # Title
+st.write(st.secrets["GOOGLE_SETTINGS"]["type"])
 st.title("Transcritor de Áudio")
-
-if os.environ["OPENAI_API_KEY"] != st.secrets["OPENAI_API_KEY"]:
-    raise st.write(":grey[Environment Variables Don't Match!]",)
 
 # Customer guidelines
 st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de seu computador, e em seguida, abra-o abaixo.")
@@ -52,35 +50,37 @@ if uploaded_file is not None:
 
 
     time.sleep(3)
-    
-    st.balloons()
-
 
     # Step 5: Get Feedback
 
-    st.write("**Como podemos melhorar?**")
+st.write("**Como podemos melhorar?**")
 
-    feedback1 = st.text_input(":blue[Deixe aqui seu feedback.]")
+feedback1 = [st.text_input(":blue[Deixe aqui seu feedback. Aperte [**enter**] para submeter.]",key="feedback")]
 
-    # if feedback1 is not ":red[Deixe aqui seu feedback.]":
+if st.session_state["feedback"] is not "":
+    with st.spinner("Sending"):
+        # Step 6: Connect google spreadsheet and get empty cell
 
-    #     time.sleep(2)
-    #     # Step 6: Create the SQL connection as specified in your secrets file.
-    #     conn = st.connection('fb_db', type='sql')
+        sheets = google_computer_engine()
+        values = find_values(sheets)
+        the_range = find_empty_cell(values)
 
-    #     st.write(f"conn contents: {conn}")
+        # Step 7: Insert the feedback into the spreadsheet
+        body = {'values': [feedback1]}
+        print(f'Body to update: {body}')
 
-    #     # Step 7: Insert some data with conn.session.
-    #     with conn.session as s:
-    #         s.execute(text('CREATE TABLE IF NOT EXISTS feedback (Sobre_Você TEXT, Feedback TEXT);'))
-    #         people = {'Bruno': 'Sou estudante de administração'}
-    #         for k in people:
-    #             s.execute(text(
-    #                 'INSERT INTO people (Sobre_Você,Feedback) VALUES (:name, :feed);'),
-    #                 params=dict(name=k, feed=people[k])
-    #             )
-    #         s.commit()
+        try:
+            response = sheets.values().update(
+                spreadsheetId=SPREADSHEET_ID, 
+                range=the_range, 
+                valueInputOption='RAW', 
+                body=body
+            ).execute()
+            
+            print(f'Response: {response}')
+        except Exception as e:
+            print(f'Error: {e}')
 
-    #     # Step 8: Query and display the data you inserted
-    #     feedback0 = conn.query('select * from feedback')
-    #     st.dataframe(feedback0)
+        
+        st.write(":green[Muito obrigado por usar o Transcritor!]")
+        st.balloons()

@@ -3,11 +3,11 @@ import openai
 import os
 import streamlit as st
 
-OPENAI = st.secrets["OPENAI_API_KEY"]
+OPENAI = st.secrets["secrets"]["OPENAI_API_KEY"]
 client = OpenAI(api_key = OPENAI)
 
 
-
+@st.cache_data()
 def process_text(text):
 
     #1 Improve Transcription
@@ -44,14 +44,18 @@ def process_text(text):
               "content": (
                   """Você é um ajudante para médicos, e vai organizar os dados de
                     uma consulta. Extraia todas as informações básicas do paciente,
-                      e crie um segmento (estilo markdown) para mostrar estas 
-                      informações, como a seguir:(entenda cada como um line break)
-                      Nome: Alberto Marinho\n Idade: 39 anos\n Gênero: Masculino\n
-                      Contato: ...\n\n Em seguida, crie outro segmento para 
-                      a história médica, e depois um para Sintomas e Razão Para Visita.
-                      Caso não encontre alguma informação, coloque o campo vazio. 
-                      Dê mais ênfase para as informações que o médico fala quando
-                      encontrar dados conflitantes."""
+                    e crie um segmento (estilo markdown) para mostrar estas 
+                    informações, como a seguir:(entenda cada como um line break)
+                    Nome: Alberto Marinho\n Idade: 39 anos\n Gênero: Masculino\n
+                    Contato: ...\n\n Em seguida, crie outro segmento para a 
+                    história médica, e depois um para Sintomas e Queixa Principal,
+                    Condições do Paciente, Encaminhamento (se ele foi encaminhado
+                    ou se veio de algum outro médico), Exames Anteriores e 
+                    Prescrição (caso o médico tenha mencionado).
+                    Caso não encontre alguma informação, coloque o seguinte ao: 
+                    final "Não encontrados os campos 'exemplo', 'exemplo' e 
+                    'exemplo'.". Dê ênfase para as informações que o médico
+                    fala quando encontrar dados conflitantes."""
                 )
             },
             {"role": "user", "content": f"{improved_transcription}",}],
