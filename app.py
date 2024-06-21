@@ -1,4 +1,5 @@
 import time
+import numpy as np
 import streamlit as st
 from extract_text import transcribe_audio
 from process_text import process_text
@@ -9,10 +10,8 @@ st.set_page_config(layout="wide")
 # Title
 st.title("Transcritor de Áudio")
 
-st.write(
-    "Has environment variables been set:",
-    os.environ["OPENAI_API_KEY"] == st.secrets["OPENAI_API_KEY"],
-)
+if os.environ["OPENAI_API_KEY"] != st.secrets["OPENAI_API_KEY"]:
+    raise st.write(":grey[Environment Variables Don't Match!]",)
 
 # Customer guidelines
 st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de seu computador, e em seguida, abra-o abaixo.")
@@ -61,7 +60,7 @@ if uploaded_file is not None:
 
     st.write("**Como podemos melhorar?**")
 
-    feedback1 = st.text_input(":red[Deixe aqui seu feedback.]")
+    feedback1 = st.text_input(":blue[Deixe aqui seu feedback.]")
 
     # if feedback1 is not ":red[Deixe aqui seu feedback.]":
 

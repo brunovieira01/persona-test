@@ -3,8 +3,8 @@ import openai
 import os
 import streamlit as st
 
-
-client = OpenAI(api_key = st.secrets["OPENAI_API_KEY"])
+OPENAI = st.secrets["OPENAI_API_KEY"]
+client = OpenAI(api_key = OPENAI)
 
 
 
