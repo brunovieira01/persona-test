@@ -4,6 +4,7 @@ from extract_text import transcribe_audio
 from process_text import process_text
 from sqlalchemy import create_engine, text
 
+st.set_page_config(layout="wide")
 # Title
 st.title("Transcritor de Áudio")
 
