@@ -4,3 +4,6 @@
 */streamlit/secrets.toml
 .streamlit
 
+.devcontainer.json
+.devcontainer
+
