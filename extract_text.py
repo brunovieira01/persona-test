@@ -6,7 +6,7 @@ import tempfile
 from openai import OpenAI
 import streamlit as st
 
-client = OpenAI(api_key = sst.secrets["OPENAI_API_KEY"])
+client = OpenAI(api_key = st.secrets["OPENAI_API_KEY"])
 
 def transcribe_audio(uploaded_file): #ajuste para +25MB
     
