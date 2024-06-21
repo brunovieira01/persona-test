@@ -5,10 +5,11 @@ from extract_text import transcribe_audio
 from process_text import process_text
 from sqlalchemy import create_engine, text
 import os
+from concurrent.futures import ThreadPoolExecutor
+
 
 st.set_page_config(layout="wide")
 # Title
-st.write(st.secrets["GOOGLE_SETTINGS"]["type"])
 st.title("Transcritor de Áudio")
 
 # Customer guidelines
@@ -39,9 +40,14 @@ if uploaded_file is not None:
     st.write("Iniciando Processamento...")    
     
     # Step 3: Process the extracted text using ChatGPT
-    processed_text,improved_transcript = process_text(transcribed_text)
-    st.write("**Texto Processado:**")
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(process_text, transcribed_text)
+        processed_text, improved_transcript = future.result()
+
     st.write(processed_text) 
+
+    # processed_text,improved_transcript = process_text(transcribed_text)
+    # st.write(processed_text) 
     ### There is a st.write_stream() function and a st.stream() function, try them later.
 
     # Step 4: Pasting the transcript
