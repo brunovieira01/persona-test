@@ -1,9 +1,8 @@
 import time
 from google_sheets import find_empty_cell, find_values, SPREADSHEET_ID, google_computer_engine
 import streamlit as st
-from extract_text import transcribe_audio
+from extract_text import Transcrição
 from process_text import process_text
-from sqlalchemy import create_engine, text
 import os
 from concurrent.futures import ThreadPoolExecutor
 
@@ -15,6 +14,7 @@ st.title("Transcritor de Áudio")
 # Customer guidelines
 st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de seu computador, e em seguida, abra-o abaixo.")
 
+st.write("")
 
 # File Upload
 uploaded_file = st.file_uploader("Escolha um arquivo de áudio de até 25MB (versão beta)...", type=["wav", "mp3", "m4a"])
@@ -22,18 +22,20 @@ uploaded_file = st.file_uploader("Escolha um arquivo de áudio de até 25MB (ver
 if uploaded_file is not None:
     
     # Step 1: Start the transcription process
-    with st.spinner("Transcrevendo áudio..."):
-        st.warning("A transcrição pode demorar um pouco.")
-        start_time = time.time()
-        transcribed_text = transcribe_audio(uploaded_file)
-        end_time = time.time()
-        actual_time = end_time - start_time
+    st.warning("A transcrição pode demorar um pouco.")
+    st.write("")
+    start_time = time.time()
+    transcribed_text = Transcrição(uploaded_file)
+    end_time = time.time()
+    actual_time = end_time - start_time
 
     # Step 2: Display timeout and completion message
     
     st.success("**Transcrição Completa!**", icon="✅")
 
     st.write(f"_Tempo de transcrição: {actual_time:.1f} segundos._")
+
+    st.write("")
 
     time.sleep(1)
 
@@ -59,7 +61,8 @@ if uploaded_file is not None:
     time.sleep(3)
 
     # Step 5: Get Feedback
-
+st.write("")
+st.write("")
 st.write("**Como podemos melhorar?**")
 
 feedback1 = [st.text_input(":blue[Deixe aqui seu feedback. Aperte [**enter**] para submeter.]",key="feedback")]
