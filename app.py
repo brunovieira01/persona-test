@@ -48,6 +48,7 @@ if uploaded_file is not None:
 
     # processed_text,improved_transcript = process_text(transcribed_text)
     # st.write(processed_text) 
+    
     ### There is a st.write_stream() function and a st.stream() function, try them later.
 
     # Step 4: Pasting the transcript
