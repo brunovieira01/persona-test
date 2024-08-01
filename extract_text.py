@@ -19,7 +19,7 @@ def Transcrição(uploaded_file): #ajuste para +25MB
 
     return transcription
 
-# The alternative below runs locally instead for cost effectiveness.
+# The alternative below runs locally instead (free but slow)
 
 # def transcribe_audio(uploaded_file):
 #     # Load Whisper model with FP32 precision on CPU
