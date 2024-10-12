@@ -1,96 +1,163 @@
-import time
-from google_sheets import find_empty_cell, find_values, SPREADSHEET_ID, google_computer_engine
 import streamlit as st
-from extract_text import Transcrição
-from process_text import process_text
-import os
-from concurrent.futures import ThreadPoolExecutor
+from supabase import create_client, Client
+import streamlit as st
+from functions import insert_user, question_count, get_last_email, send_answers, get_user_id_by_email 
 
-
+#1 Page configuration has to be on the first streamlit function call
 st.set_page_config(layout="wide")
-# Title
-st.title("Transcritor de Áudio")
+#2 Title of the page
+st.title("Moral-Personality Test")
+#3 First guidelines
+st.write("There are 20 questions that shall decide your moral personality. Think well before answering.")
+st.write("") # I add some space in some places for better experience
 
-# Customer guidelines
-st.write("Grave sua consulta utilizando o gravador de áudio do celular ou de seu computador, e em seguida, abra-o abaixo.")
+#4 Set up your Supabase URL and API Key using Streamlit Secrets
+# the secrets have to be set on secrets.toml file or (in case of deploying) in your streamlit app website settings
+supabase_url = st.secrets["SUPABASE_URL"] 
+supabase_key = st.secrets["SUPABASE_KEY"] 
+
+#5 Create the Supabase client
+supabase: Client = create_client(supabase_url, supabase_key)
+#6 Check for errors
+response = supabase.table("users").select("*").execute()
+if response.data is None:  # if no data is returned, there might be an error
+    st.write(":red[An error occurred with the connection to the database. Please contact Bruno.]", "response: ", response)
 
 st.write("")
-
-# File Upload
-uploaded_file = st.file_uploader("Escolha um arquivo de áudio de até 25MB (versão beta)...", type=["wav", "mp3", "m4a"])
-
-if uploaded_file is not None:
-    
-    # Step 1: Start the transcription process
-    st.warning("A transcrição pode demorar um pouco.")
-    st.write("")
-    start_time = time.time()
-    transcribed_text = Transcrição(uploaded_file)
-    end_time = time.time()
-    actual_time = end_time - start_time
-
-    # Step 2: Display timeout and completion message
-    
-    st.success("**Transcrição Completa!**", icon="✅")
-
-    st.write(f"_Tempo de transcrição: {actual_time:.1f} segundos._")
-
-    st.write("")
-
-    time.sleep(1)
-
-    st.write("Iniciando Processamento...")    
-    
-    # Step 3: Process the extracted text using ChatGPT
-    with ThreadPoolExecutor() as executor:
-        future = executor.submit(process_text, transcribed_text)
-        processed_text, improved_transcript = future.result()
-
-    st.write(processed_text) 
-
-    # processed_text,improved_transcript = process_text(transcribed_text)
-    # st.write(processed_text) 
-    
-    ### There is a st.write_stream() function and a st.stream() function, try them later.
-
-    # Step 4: Pasting the transcript
-    st.write("**Transcrição Processada:**")
-    st.write(improved_transcript)
-
-
-    time.sleep(3)
-
-    # Step 5: Get Feedback
 st.write("")
-st.write("")
-st.write("**Como podemos melhorar?**")
 
-feedback1 = [st.text_input(":blue[Deixe aqui seu feedback. Aperte [**enter**] para submeter.]",key="feedback")]
+#7 Initialize user_selections in session_state if not already present
+if 'user_selections' not in st.session_state:
+    st.session_state.user_selections = [None] * question_count()  # imported from functions.py
+                                           # ^initialize as a list with none for each question
 
-if st.session_state["feedback"] is not "":
-    with st.spinner("Sending"):
-        # Step 6: Connect google spreadsheet and get empty cell
+#8 Get the total number of questions from the table 'questions'
+question_number = question_count()  
+#9 Fetch actual questions from the 'questions' table
+questions_response = supabase.table("questions").select("*").execute()
+#10 Fetch alternatives from the 'possible_answers' table
+answers_response = supabase.table("possible_answers").select("*").execute()
 
-        sheets = google_computer_engine()
-        values = find_values(sheets)
-        the_range = find_empty_cell(values)
+#11 Create a list of letters for labeling alternatives
+letters = ['a)', 'b)', 'c)', 'd)', 'e)', 'f)', 'g)', 'h)', 'i)', 'j)']  # extend this list as needed
 
-        # Step 7: Insert the feedback into the spreadsheet
-        body = {'values': [feedback1]}
-        print(f'Body to update: {body}')
+#12 Iterate through the questions and display the question number
+for i in range(1, question_number + 1):
+    st.write(f"**Question {i}.**")
 
-        try:
-            response = sheets.values().update(
-                spreadsheetId=SPREADSHEET_ID, 
-                range=the_range, 
-                valueInputOption='RAW', 
-                body=body
-            ).execute()
-            
-            print(f'Response: {response}')
-        except Exception as e:
-            print(f'Error: {e}')
+    # fetch the alternatives for the current question
+    alternatives = [answer["Alternatives"] for answer in answers_response.data if answer["Question"] == i]
 
+    # display each alternative with corresponding letter and a button for selection
+    for index, alternative in enumerate(alternatives):
+        if index < len(letters):  # check to avoid IndexError
+            button_label = f"{letters[index]} {alternative}"
+        else:
+            button_label = f"{index + 1}) {alternative}"  # fallback for more than 10 alternatives
         
-        st.write(":green[Muito obrigado por usar o Transcritor!]")
-        st.balloons()
+        # check if this alternative was previously selected
+        if st.session_state.user_selections[i - 1] == button_label.split(" ")[0]:  # using i - 1 for zero-based index
+            # use markdown to style the selected button
+            st.markdown(f"<span style='color: white; background-color: red; padding: 10px; border-radius: 5px;'>{button_label}</span>", unsafe_allow_html=True)
+        else:
+            # create a button for each alternative
+            if st.button(button_label, key=f"question_{i}_alternative_{index}"):
+                # store the selection in the list
+                st.session_state.user_selections[i - 1] = button_label.split(" ")[0]  # Store only the letter
+
+    st.write("")  # add space between questions
+
+#13 Display the user selections in the sidebar
+st.sidebar.write("User selections:", st.session_state.user_selections)
+#14 Check if user selections are all filled
+if all(selection is not None for selection in st.session_state.user_selections):
+    # requesting user name and email
+    name = [st.text_input(":gray[Your name]", key="NAME")]
+    email = [st.text_input(":gray[Your email]", key="EMAIL")]
+    st.write("")
+
+#15 Check if user is ready to submit test and submit it
+if email[0] != "":
+    if name[0] != "":
+        # check if the email already exists in the database
+        response = supabase.table('users').select('email').eq('email', email[0]).execute()
+        # if the email does not exist, insert new user
+        if not response.data:
+            insert_user(name[0], email[0])  # insert user if email is not found
+            print("########### New user created. ###########")
+            response.data = [{'email': email[0]}] # collapsing 'response' possibilities for further use
+        else: 
+            print("This email already exists: ", response.data[0]['email'])
+    
+        # retrieve the last email from the 'users' table
+        last_email = get_last_email()  # why? I don't know
+
+        # check if the input email is in the database, if yes, submit and return success
+        if response.data[0]["email"] == email[0]:
+            # send the answers to the database
+            user_id = get_user_id_by_email()
+            if user_id:
+                print(f"########### User ID retrieved: {user_id} #############")
+                send_answers(st.session_state.user_selections, user_id)
+                st.success(f"**Your test was submitted, {name[0]}!**", icon="✅")
+            else:
+                st.warning("Error: user ID not found. Please input a name and a new email.")
+    else:
+        st.write(":red[This won't work if you don't input your name...]")
+else:
+    st.warning("Please answer all questions before proceeding.")
+
+#16 Just a small tip
+st.write("*Tip: You will know your answers are submitted when you see the* ✅.")
+
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+st.write("")
+
+#17 Get Feedback
+st.write("**Any suggestions? Tell us what you think.**")
+feedback1 = st.text_input("", key="feedback")
+
+#18 Initialize variables and catch mismatchs
+user_id = None
+try: user_id = get_user_id_by_email()
+except: user_id = None
+try:            # I don't really know why this is here...
+    if email == None: email = [""]
+    if name == None: name = [""]
+except NameError:
+    email = [""]
+    name = [""]
+
+#19 Insert feedback into 'feedback' table
+if feedback1 != "" and email[0] != "" and name[0] != "":
+    # only insert feedback if user_id is found
+    if user_id is not None:
+        response = supabase.table("feedback").insert({
+            "suggestions": feedback1,
+            "user_id": user_id
+        }).execute()
+
+        # check for success
+        if response.data:
+            st.success("Thank you for the most useful feedback! No, seriously!")
+            st.balloons()
+        elif response.error:
+            st.write(":red[An error occurred:]", response.error)
+    else:
+        st.write(":red[Cannot submit feedback without a valid user ID. Try filling your name and email address.]")
+elif feedback1 != "":
+    st.write(":red[Please fill in your name and email to submit.]")
+
+
+
+
+# Spinner Functionality: st.spinner()
+# Waiting Functionality: time.sleep(1)
+# Streaming strings Functionality: st.write_stream() and st.stream()
+

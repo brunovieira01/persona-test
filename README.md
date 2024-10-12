@@ -1,17 +1,12 @@
-# AutoDoc
-Automatic Documentation of Consultations
+# Personality Test
 
-This is the first MVP of the startup series by Bruno Vieira
+Website that tests the personality of users
+
+This is a modification of the AutoDoc project, still under construction. It currently works on a streamlit website, and is connected to a supabase PostgreSQL database. The idea is to implement OpenAI agents and process the test results with it.
 
 Make sure you follow the list of requirements.
 
 Informational
 
-    This product generates an interface with streamlit, which
-    the user can use to the upload an audio file. The uploaded
-    file will then be trancribed by OpenAI-whisper, and 
-    further processed by OpenAI-ChatGPT-4o, which in turn will
-    provide information about the consultation.
-
-You may change the prompt to any context so it returns a 
-better answer.
+    This moral personality test was started on a whim, in a mix of two different desires:
+    for one, I wanted to think more about morally difficult questions, and try to solidify my thoughts and morality; and secondly, I wanted to share it with others, to incentivize people to understand more about how they think and why. The results have been interesting so far, and perhaps I will disclose them somehow, sometime.
