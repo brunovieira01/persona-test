@@ -7,3 +7,4 @@
 .devcontainer.json
 .devcontainer
 
+.__pycache__
