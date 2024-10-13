@@ -71,7 +71,7 @@ for i in range(1, question_number + 1):
     st.write("")  # add space between questions
 
 #13 Display the user selections in the sidebar
-st.sidebar.write("User selections:", st.session_state.user_selections)
+# st.sidebar.write("User selections:", st.session_state.user_selections)
 #14 Check if user selections are all filled
 if all(selection is not None for selection in st.session_state.user_selections):
     # requesting user name and email
