@@ -36,7 +36,7 @@ if 'user_selections' not in st.session_state:
 #8 Get the total number of questions from the table 'questions'
 question_number = question_count()  
 #9 Fetch actual questions from the 'questions' table
-questions_response = supabase.table("questions").select("question_text").execute()
+questions_response = supabase.table("questions").select("question_text").order("id").execute()
 questions_list = [question["question_text"] for question in questions_response.data]
 #10 Fetch alternatives from the 'possible_answers' table
 answers_response = supabase.table("possible_answers").select("*").execute()
