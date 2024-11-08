@@ -5,5 +5,5 @@ ffmpeg==1.4
 streamlit==1.32.0
 SQLAlchemy==2.0.31
 supabase==2.9.0
-plotly==1.16.0
+plotly==5.6.0
 
